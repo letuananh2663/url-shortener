@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
-import { CopyIcon, EyeIcon } from 'lucide-react'
+import { Check, CopyIcon, EyeIcon } from 'lucide-react'
 
 type Url = {
     id: string;
@@ -13,6 +13,8 @@ type Url = {
 }
 export default function UrlList() {
     const [urls, setUrls] = useState<Url[]>([]);
+    const [copied, setCopied] = useState<boolean>(false);
+    const [copyUrl, setCopyUrl] = useState<string>('');
 
     const shortenerUrl = (code: string) => `${process.env.NEXT_PUBLIC_BASE_URL}/${code}`;
 
@@ -24,6 +26,18 @@ export default function UrlList() {
         } catch (error) {
             console.error('Error fetching URLs', error)
         }
+    }
+
+    const handleCopyUrl = (code: string) => {
+        const fullUrl = `${shortenerUrl(code)}`;
+        navigator.clipboard.writeText(fullUrl).then(() => {
+            setCopied(true);
+            setCopyUrl(code);
+            setTimeout(() => {
+                setCopied(false);
+                setCopyUrl('');
+            }, 3000);
+        })
     }
 
     useEffect(() => {
@@ -40,8 +54,12 @@ export default function UrlList() {
                             {shortenerUrl(url.shortCode)}
                         </Link>
                         <div className='flex items-center gap-2'>
-                            <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted'>
-                                <CopyIcon className='w-4 h-4' />
+                            <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted' onClick={() => handleCopyUrl(url.shortCode)}>
+                                {copied && copyUrl == url.shortCode ? (
+                                    <Check className='w-4 h-4' />
+                                ) : (
+                                    <CopyIcon className='w-4 h-4' />
+                                )}
                                 <span className='sr-only'>Copy to Clipboard</span>
                             </Button>
                             <span className='flex items-center gap-2'>
