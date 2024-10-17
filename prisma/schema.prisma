@@ -17,6 +17,7 @@ model Url {
   id String @id @default(cuid())
   originalUrl String
   shortCode String @unique
+  expirationDate DateTime?
   createAt DateTime @default(now())
   visits Int @default(0)
 }

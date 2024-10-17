@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
+import toast from 'react-hot-toast';
 
 interface ShortenFormProps {
     handleUrlShortened: () => void;
@@ -10,6 +11,7 @@ interface ShortenFormProps {
 
 export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
     const [url, setUrl] = useState<string>('');
+    const [expirationDate, setExpirationDate] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -22,13 +24,24 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     url,
+                    expirationDate,
                 }),
             });
-            await response.json();
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                toast.error(data.error || 'Something went wrong!');
+                return;
+            }
+
             setUrl('');
+            setExpirationDate('');
             handleUrlShortened();
+            toast.success(`URL shortened successfully! It will expire on ${new Date(expirationDate).toLocaleString()}`);
         } catch (error) {
             console.error('Error shortening URL: ', error);
+            toast.error('Internal Server Error');
         } finally {
             setIsLoading(false);
         }
@@ -43,7 +56,15 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                     className='h-12'
                     type='url'
                     placeholder='Enter URL to shorten'
-                    required />
+                    required
+                />
+                <Input
+                    value={expirationDate}
+                    onChange={(e) => setExpirationDate(e.target.value)}
+                    className='h-12'
+                    type='date'
+                    placeholder='Select expiration date'
+                />
                 <Button className='w-full p-2' type='submit' disabled={isLoading}>
                     {isLoading ? 'Shortening...' : 'Shorten URL'}
                 </Button>
