@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useState } from 'react'
 import { Input } from './ui/input'
-import { Button } from './ui/button'
 import toast from 'react-hot-toast';
+import { Button } from './ui/button'
+import React, { useState } from 'react'
+import { Eye, EyeClosed } from 'lucide-react';
 
 interface ShortenFormProps {
     handleUrlShortened: () => void;
@@ -11,8 +12,10 @@ interface ShortenFormProps {
 
 export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
     const [url, setUrl] = useState<string>('');
-    const [expirationDate, setExpirationDate] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [expirationDate, setExpirationDate] = useState<string>('');
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,6 +28,7 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                 body: JSON.stringify({
                     url,
                     expirationDate,
+                    password
                 }),
             });
 
@@ -35,10 +39,15 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                 return;
             }
 
+            const expirationMessage = expirationDate
+                ? `It will expire on ${new Date(expirationDate).toLocaleString()}`
+                : '';
+
             setUrl('');
-            setExpirationDate('');
+            setPassword('');
             handleUrlShortened();
-            toast.success(`URL shortened successfully! It will expire on ${new Date(expirationDate).toLocaleString()}`);
+            setExpirationDate('');
+            toast.success(`URL shortened successfully! ${expirationMessage}`);
         } catch (error) {
             console.error('Error shortening URL: ', error);
             toast.error('Internal Server Error');
@@ -58,6 +67,22 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                     placeholder='Enter URL to shorten'
                     required
                 />
+                <div className="relative">
+                    <Input
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className='h-12'
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder='Set a password (optional)'
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none"
+                    >
+                        {showPassword ? <EyeClosed className='w-4 h-4' /> : <Eye className='w-4 h-4' />}
+                    </button>
+                </div>
                 <Input
                     value={expirationDate}
                     onChange={(e) => setExpirationDate(e.target.value)}

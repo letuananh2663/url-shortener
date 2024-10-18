@@ -1,8 +1,8 @@
 "use client"
 
+import UrlList from "./url-list";
 import React, { useState } from "react";
 import ShortenForm from "./shorten-form";
-import UrlList from "./url-list";
 
 export default function UrlShortenerContainer() {
     const [refreshKey, setRefreshKey] = useState(0);

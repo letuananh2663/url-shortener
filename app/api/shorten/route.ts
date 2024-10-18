@@ -1,9 +1,10 @@
+import bcrypt from "bcrypt";
 import prisma from "@/lib/db";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { url, expirationDate } = await request.json();
+  const { url, expirationDate, password } = await request.json();
 
   if (expirationDate) {
     const date = new Date(expirationDate);
@@ -17,12 +18,31 @@ export async function POST(request: NextRequest) {
 
   const shortCode = nanoid(8);
 
-  const shortenedUrl = await prisma.url.create({
-    data: {
-      originalUrl: url,
-      shortCode,
-      expirationDate: expirationDate ? new Date(expirationDate) : null,
-    },
-  });
-  return NextResponse.json({ shortCode: shortenedUrl.shortCode });
+  try {
+    let hashedPassword = null;
+    if (password) {
+      const saltRounds = 10;
+      hashedPassword = await bcrypt.hash(password, saltRounds);
+    }
+
+    const shortenedUrl = await prisma.url.create({
+      data: {
+        originalUrl: url,
+        shortCode,
+        expirationDate: expirationDate ? new Date(expirationDate) : null,
+        password: hashedPassword,
+      },
+    });
+
+    return NextResponse.json({
+      shortCode: shortenedUrl.shortCode,
+      originalUrl: shortenedUrl.originalUrl,
+    });
+  } catch (error) {
+    console.error("Error creating shortened URL:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
