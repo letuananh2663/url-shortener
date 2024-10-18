@@ -1,5 +1,3 @@
-// "use client"
-
 import Link from 'next/link'
 import { Button } from './ui/button'
 import React, { useEffect, useState } from 'react'
@@ -13,8 +11,8 @@ type Url = {
 }
 export default function UrlList() {
     const [urls, setUrls] = useState<Url[]>([]);
-    const [copied, setCopied] = useState<boolean>(false);
     const [copyUrl, setCopyUrl] = useState<string>('');
+    const [copied, setCopied] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const shortenerUrl = (code: string) => `${process.env.NEXT_PUBLIC_BASE_URL}/${code}`;

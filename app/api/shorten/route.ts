@@ -4,7 +4,8 @@ import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { url, expirationDate, password } = await request.json();
+  const { url, expirationDate, password, customShortCode } =
+    await request.json();
 
   if (expirationDate) {
     const date = new Date(expirationDate);
@@ -16,7 +17,17 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const shortCode = nanoid(8);
+  const shortCode = customShortCode ? customShortCode.trim() : nanoid(8);
+
+  if (customShortCode) {
+    const existingUrl = await prisma.url.findUnique({ where: { shortCode } });
+    if (existingUrl) {
+      return NextResponse.json(
+        { error: "Short code already exists" },
+        { status: 400 }
+      );
+    }
+  }
 
   try {
     let hashedPassword = null;

@@ -16,10 +16,17 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [expirationDate, setExpirationDate] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [customShortCode, setCustomShortCode] = useState<string>('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+
+        if (customShortCode.length !== 8) {
+            toast.error('Custom short code must be exactly 8 characters.');
+            setIsLoading(false);
+            return;
+        }
 
         try {
             const response = await fetch('/api/shorten', {
@@ -28,7 +35,8 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                 body: JSON.stringify({
                     url,
                     expirationDate,
-                    password
+                    password,
+                    customShortCode
                 }),
             });
 
@@ -47,6 +55,7 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
             setPassword('');
             handleUrlShortened();
             setExpirationDate('');
+            setCustomShortCode('');
             toast.success(`URL shortened successfully! ${expirationMessage}`);
         } catch (error) {
             console.error('Error shortening URL: ', error);
@@ -89,6 +98,15 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                     className='h-12'
                     type='date'
                     placeholder='Select expiration date'
+                />
+                <Input
+                    value={customShortCode}
+                    onChange={(e) => setCustomShortCode(e.target.value.slice(0, 8))}
+                    className='h-12'
+                    type='text'
+                    placeholder='Custom short code (8 characters)'
+                    maxLength={8}
+                    required
                 />
                 <Button className='w-full p-2' type='submit' disabled={isLoading}>
                     {isLoading ? 'Shortening...' : 'Shorten URL'}

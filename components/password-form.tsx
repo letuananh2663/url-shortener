@@ -13,8 +13,8 @@ interface PasswordFormProps {
 
 const PasswordForm: React.FC<PasswordFormProps> = ({ url }) => {
     const [password, setPassword] = useState<string>("");
-    const [showPassword, setShowPassword] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     useEffect(() => {
         const authenticated = Cookies.get(`auth-${url.id}`);
