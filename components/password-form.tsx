@@ -61,12 +61,12 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ url }) => {
 
     return (
         <form onSubmit={handleSubmit} className='mb-4'>
-            <div className='space-y-4'>
+            <div className='space-y-4 text-center'>
                 <div className="relative">
                     <Input
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className='h-12'
+                        className='h-12 rounded-full text-neutral-400 pl-4'
                         type={showPassword ? 'text' : 'password'}
                         placeholder='Enter password'
                         required
@@ -74,13 +74,13 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ url }) => {
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 focus:outline-none"
                     >
-                        {showPassword ? <EyeClosed className='w-4 h-4' /> : <Eye className='w-4 h-4' />}
+                        {showPassword ? <EyeClosed className='w-4 h-4 text-neutral-400' /> : <Eye className='w-4 h-4 text-neutral-400' />}
                     </button>
                 </div>
-                <Button className='w-full p-2' type='submit' disabled={isLoading}>
-                    {isLoading ? "Submitting..." : "Submit"}
+                <Button className='w-1/2 p-2 text-neutral-300 bg-blue-600 hover:bg-blue-600/50' type='submit' disabled={isLoading}>
+                    {isLoading ? 'Submitting...' : 'Submit'}
                 </Button>
             </div>
         </form>

@@ -4,7 +4,7 @@ import { Input } from './ui/input'
 import toast from 'react-hot-toast';
 import { Button } from './ui/button'
 import React, { useState } from 'react'
-import { Eye, EyeClosed } from 'lucide-react';
+import { ArrowRight, Clipboard, Eye, EyeClosed, Link } from 'lucide-react';
 
 interface ShortenFormProps {
     handleUrlShortened: () => void;
@@ -22,10 +22,12 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
         e.preventDefault();
         setIsLoading(true);
 
-        if (customShortCode.length !== 8) {
-            toast.error('Custom short code must be exactly 8 characters.');
-            setIsLoading(false);
-            return;
+        if (customShortCode.length !== 0) {
+            if (customShortCode.length !== 8) {
+                toast.error('Custom short code must be exactly 8 characters.');
+                setIsLoading(false);
+                return;
+            }
         }
 
         try {
@@ -65,51 +67,66 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
         }
     }
 
+    const handlePaste = async () => {
+        try {
+            const clipboardText = await navigator.clipboard.readText();
+            setUrl(clipboardText);
+        } catch (error) {
+            console.error('Failed to read clipboard contents: ', error);
+            toast.error('Failed to paste from clipboard');
+        }
+    }
+
     return (
         <form onSubmit={handleSubmit} className='mb-4'>
-            <div className='space-y-4'>
-                <Input
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    className='h-12'
-                    type='url'
-                    placeholder='Enter URL to shorten'
-                    required
-                />
+            <div className='space-y-4 text-center'>
+                <div className="relative">
+                    <Link className="w-4 h-4 text-neutral-300 absolute left-4 bottom-1/3" />
+                    <Input
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        className='pl-12 h-12 rounded-full text-neutral-400'
+                        type='url'
+                        placeholder='Enter URL to shorten'
+                        required
+                    />
+                    <Button type="button" onClick={handlePaste} className="p-[10px] bg-blue-600 hover:bg-blue-600/50 absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none rounded-full">
+                        <Clipboard className="w-4 h-4 text-neutral-300" />
+                    </Button>
+                </div>
                 <div className="relative">
                     <Input
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className='h-12'
+                        className='h-12 rounded-full text-neutral-400 pl-4'
                         type={showPassword ? 'text' : 'password'}
                         placeholder='Set a password (optional)'
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 focus:outline-none"
                     >
-                        {showPassword ? <EyeClosed className='w-4 h-4' /> : <Eye className='w-4 h-4' />}
+                        {showPassword ? <EyeClosed className='w-4 h-4 text-neutral-400' /> : <Eye className='w-4 h-4 text-neutral-400' />}
                     </button>
                 </div>
                 <Input
                     value={expirationDate}
                     onChange={(e) => setExpirationDate(e.target.value)}
-                    className='h-12'
+                    className='h-12 rounded-full text-neutral-400 pl-4'
                     type='date'
-                    placeholder='Select expiration date'
                 />
                 <Input
                     value={customShortCode}
                     onChange={(e) => setCustomShortCode(e.target.value.slice(0, 8))}
-                    className='h-12'
+                    className='h-12 rounded-full text-neutral-400 pl-4'
                     type='text'
                     placeholder='Custom short code (8 characters)'
                     maxLength={8}
-                    required
                 />
-                <Button className='w-full p-2' type='submit' disabled={isLoading}>
+                <Button className='w-1/2 p-2 text-neutral-300 bg-blue-600 hover:bg-blue-600/50' type='submit' disabled={isLoading}>
                     {isLoading ? 'Shortening...' : 'Shorten URL'}
+                    <ArrowRight className='w-4 h-4' />
                 </Button>
             </div>
         </form>
