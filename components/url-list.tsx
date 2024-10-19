@@ -79,7 +79,7 @@ export default function UrlList() {
                                 {url.originalUrl}
                             </Link>
                             <div className="flex items-center space-x-2">
-                                <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted' onClick={() => handleCopyUrl(url.shortCode)}>
+                                <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted/10' onClick={() => handleCopyUrl(url.shortCode)}>
                                     {copied && copyUrl === url.shortCode ? (
                                         <Check className='w-4 h-4 text-neutral-300' />
                                     ) : (

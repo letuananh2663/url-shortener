@@ -1,26 +1,40 @@
 "use client"
 
+import Cookies from "js-cookie";
 import { Input } from './ui/input'
 import toast from 'react-hot-toast';
 import { Button } from './ui/button'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ArrowRight, Clipboard, Eye, EyeClosed, Link } from 'lucide-react';
 
 interface ShortenFormProps {
     handleUrlShortened: () => void;
+    userLoggedIn: boolean;
 }
 
-export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
+export default function ShortenForm({ handleUrlShortened, userLoggedIn }: ShortenFormProps) {
     const [url, setUrl] = useState<string>('');
+    const [urlCount, setUrlCount] = useState<number>(0);
     const [password, setPassword] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [expirationDate, setExpirationDate] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [customShortCode, setCustomShortCode] = useState<string>('');
 
+    useEffect(() => {
+        const count = Cookies.get('urlCount') ? parseInt(Cookies.get('urlCount') as string) : 0;
+        setUrlCount(count);
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+
+        if (!userLoggedIn && urlCount >= 5) {
+            toast.error('You have reached the limit of 5 URLs. Please register to shorten more.');
+            setIsLoading(false);
+            return;
+        }
 
         if (customShortCode.length !== 0) {
             if (customShortCode.length !== 8) {
@@ -48,6 +62,10 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                 toast.error(data.error || 'Something went wrong!');
                 return;
             }
+
+            const newCount = urlCount + 1;
+            setUrlCount(newCount);
+            Cookies.set('urlCount', newCount.toString(), { expires: 1 });
 
             const expirationMessage = expirationDate
                 ? `It will expire on ${new Date(expirationDate).toLocaleString()}`
@@ -87,7 +105,7 @@ export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
                         onChange={(e) => setUrl(e.target.value)}
                         className='pl-12 h-12 rounded-full text-neutral-400'
                         type='url'
-                        placeholder='Enter URL to shorten'
+                        placeholder='Enter the link here'
                         required
                     />
                     <Button type="button" onClick={handlePaste} className="p-[10px] bg-blue-600 hover:bg-blue-600/50 absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none rounded-full">
