@@ -46,6 +46,10 @@ export default function UrlList() {
         fetchUrls();
     }, []);
 
+    if (urls.length === 0) {
+        return
+    }
+
     if (isLoading) {
         return (
             <div className='animate-pulse'>
