@@ -29,7 +29,7 @@ model Url {
 model User {
   id String @id @default(cuid())
   email String @unique
-  password String
+  verified Boolean @default(false)
   createdAt DateTime @default(now())
   urlCount Int @default(0) 
   urls Url[] 
