@@ -1,23 +1,26 @@
 import bcrypt from "bcrypt";
 import prisma from "@/lib/db";
 import { nanoid } from "nanoid";
+import { getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { url, expirationDate, password, customShortCode, userId } =
+  const { url, expirationDate, password, customShortCode } =
     await request.json();
 
+  const { userId } = getAuth(request);
   const ipAddress = request.headers.get("x-forwarded-for") || request.ip;
-
   const normalizedIpAddress = ipAddress ? ipAddress.trim() : null;
 
-  const urlCount = await prisma.url.count({
+  let urlCount = 0;
+
+  urlCount = await prisma.url.count({
     where: {
-      OR: [{ userId }, { ipAddress: normalizedIpAddress }],
+      ipAddress: normalizedIpAddress,
     },
   });
 
-  if (urlCount >= 5) {
+  if (!userId && urlCount >= 5) {
     return NextResponse.json(
       {
         error:
@@ -63,7 +66,6 @@ export async function POST(request: NextRequest) {
         expirationDate: expirationDate ? new Date(expirationDate) : null,
         password: hashedPassword,
         ipAddress: normalizedIpAddress,
-        userId,
       },
     });
 

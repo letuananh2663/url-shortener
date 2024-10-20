@@ -22,8 +22,6 @@ model Url {
   createAt DateTime @default(now())
   visits Int @default(0)
   ipAddress String?
-  userId String?
-  user User? @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -32,5 +30,4 @@ model User {
   verified Boolean @default(false)
   createdAt DateTime @default(now())
   urlCount Int @default(0) 
-  urls Url[] 
 }

@@ -4,15 +4,16 @@ import Cookies from "js-cookie";
 import { Input } from './ui/input'
 import toast from 'react-hot-toast';
 import { Button } from './ui/button'
+import { useUser } from "@clerk/nextjs";
 import React, { useEffect, useState } from 'react'
 import { ArrowRight, Clipboard, Eye, EyeClosed, Link } from 'lucide-react';
 
 interface ShortenFormProps {
     handleUrlShortened: () => void;
-    userLoggedIn: boolean;
 }
 
-export default function ShortenForm({ handleUrlShortened, userLoggedIn }: ShortenFormProps) {
+export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
+    const { user, isSignedIn } = useUser();
     const [url, setUrl] = useState<string>('');
     const [urlCount, setUrlCount] = useState<number>(0);
     const [password, setPassword] = useState<string>('');
@@ -30,18 +31,16 @@ export default function ShortenForm({ handleUrlShortened, userLoggedIn }: Shorte
         e.preventDefault();
         setIsLoading(true);
 
-        if (!userLoggedIn && urlCount >= 5) {
+        if (!isSignedIn && urlCount >= 5) {
             toast.error('You have reached the limit of 5 URLs. Please register to shorten more.');
             setIsLoading(false);
             return;
         }
 
-        if (customShortCode.length !== 0) {
-            if (customShortCode.length !== 8) {
-                toast.error('Custom short code must be exactly 8 characters.');
-                setIsLoading(false);
-                return;
-            }
+        if (customShortCode.length !== 0 && customShortCode.length !== 8) {
+            toast.error('Custom short code must be exactly 8 characters.');
+            setIsLoading(false);
+            return;
         }
 
         try {
@@ -52,7 +51,8 @@ export default function ShortenForm({ handleUrlShortened, userLoggedIn }: Shorte
                     url,
                     expirationDate,
                     password,
-                    customShortCode
+                    customShortCode,
+                    userId: isSignedIn ? user.id : null
                 }),
             });
 
