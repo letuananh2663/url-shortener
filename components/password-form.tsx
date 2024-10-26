@@ -19,10 +19,13 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ url }) => {
     useEffect(() => {
         const authenticated = Cookies.get(`auth-${url.id}`);
         if (authenticated) {
-            console.log("User is authenticated.");
-            window.location.href = url.originalUrl;
-        } else {
-            console.log("User is not authenticated.");
+            const timestamp = parseInt(authenticated);
+            const now = Date.now();
+            if (now - timestamp < 5 * 60 * 1000) {
+                window.location.href = url.originalUrl;
+            } else {
+                Cookies.remove(`auth-${url.id}`);
+            }
         }
     }, [url.id, url.originalUrl]);
 
@@ -31,18 +34,18 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ url }) => {
         setIsLoading(true);
 
         try {
-            const res = await fetch('/api/verify', {
-                method: 'POST',
+            const res = await fetch("/api/verify", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ password, id: url.id }),
             });
 
             if (res.ok) {
-                Cookies.set(`auth-${url.id}`, "true", { expires: 1 / 288 });
-
                 const data = await res.json();
+                const expirationTimestamp = Date.now().toString();
+                Cookies.set(`auth-${url.id}`, expirationTimestamp, { expires: 1 / (24 * 60), path: '/' });
                 window.location.href = data.redirect;
             } else {
                 const data = await res.json();
@@ -50,7 +53,7 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ url }) => {
                     toast.error(data.message);
                 }
             }
-            setPassword('');
+            setPassword("");
         } catch (error) {
             console.error("Error:", error);
             toast.error("An error occurred. Please try again.");
@@ -60,26 +63,30 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ url }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className='mb-4'>
-            <div className='space-y-4'>
+        <form onSubmit={handleSubmit} className="mb-4">
+            <div className="space-y-4 text-center">
                 <div className="relative">
                     <Input
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className='h-12'
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder='Enter password'
+                        className="h-12 rounded-full text-neutral-400 pl-4 bg-transparent"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter password"
                         required
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 focus:outline-none"
                     >
-                        {showPassword ? <EyeClosed className='w-4 h-4' /> : <Eye className='w-4 h-4' />}
+                        {showPassword ? (
+                            <EyeClosed className="w-4 h-4 text-neutral-400" />
+                        ) : (
+                            <Eye className="w-4 h-4 text-neutral-400" />
+                        )}
                     </button>
                 </div>
-                <Button className='w-full p-2' type='submit' disabled={isLoading}>
+                <Button className="w-1/2 p-2 text-neutral-300 bg-blue-600 hover:bg-blue-600/50" type="submit" disabled={isLoading}>
                     {isLoading ? "Submitting..." : "Submit"}
                 </Button>
             </div>

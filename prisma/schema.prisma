@@ -21,4 +21,6 @@ model Url {
   password String?
   createAt DateTime @default(now())
   visits Int @default(0)
+  userId String?
+  ipAddress String?
 }

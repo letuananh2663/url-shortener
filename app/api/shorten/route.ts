@@ -3,9 +3,31 @@ import prisma from "@/lib/db";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
+interface ShortenRequest {
+  url: string;
+  expirationDate?: string;
+  password?: string;
+  customShortCode?: string;
+  userId?: string;
+  ipAddress?: string;
+}
+
 export async function POST(request: NextRequest) {
-  const { url, expirationDate, password, customShortCode } =
-    await request.json();
+  const { url, expirationDate, password, customShortCode, userId, ipAddress } =
+    (await request.json()) as ShortenRequest;
+
+  if (!userId) {
+    const ipCount = await prisma.url.count({ where: { ipAddress } });
+    if (ipCount >= 5) {
+      return NextResponse.json(
+        {
+          error:
+            "You have reached the limit of 5 URLs. Please register to shorten more.",
+        },
+        { status: 403 }
+      );
+    }
+  }
 
   if (expirationDate) {
     const date = new Date(expirationDate);
@@ -42,6 +64,8 @@ export async function POST(request: NextRequest) {
         shortCode,
         expirationDate: expirationDate ? new Date(expirationDate) : null,
         password: hashedPassword,
+        userId: userId || null,
+        ipAddress: ipAddress || null,
       },
     });
 

@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link'
 import { Button } from './ui/button'
 import React, { useEffect, useState } from 'react'
@@ -46,147 +48,61 @@ export default function UrlList() {
         fetchUrls();
     }, []);
 
+    if (urls.length === 0) {
+        return
+    }
+
     if (isLoading) {
         return (
-            <div>
-                <h2 className='text-2xl font-bold mb-2'>Recent URLs</h2>
-                <ul className='space-y-2 md:hidden'>
-                    {urls.map((url) => (
-                        <li key={url.id} className='flex justify-between items-center gap-2'>
-                            <Link href={`/${url.shortCode}`} target='_blank' className='text-blue-500'>
-                                {shortenerUrl(url.shortCode)}
-                            </Link>
-                            <div className='flex items-center gap-2'>
-                                <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted' onClick={() => handleCopyUrl(url.shortCode)}>
-                                    {copied && copyUrl == url.shortCode ? (
-                                        <Check className='w-4 h-4' />
-                                    ) : (
-                                        <CopyIcon className='w-4 h-4' />
-                                    )}
-                                    <span className='sr-only'>Copy to Clipboard</span>
-                                </Button>
-                                <span className='flex items-center gap-2'>
-                                    <EyeIcon className='w-4 h-4' />
-                                    {url.visits}
-                                </span>
+            <div className='animate-pulse'>
+                <div className='h-8 bg-gray-200 rounded w-1/4 mb-4'></div>
+                <div className='space-y-2'>
+                    {[1, 2, 3].map((num) => (
+                        <div key={num} className='flex items-center justify-between bg-gray-900 px-6 py-3 mb-[2px] rounded'>
+                            <div className='h-4 bg-gray-200 rounded w-3/5'></div>
+                            <div className='flex items-center space-x-2'>
+                                <div className='h-5 w-5 bg-gray-200 rounded'></div>
+                                <div className='h-4 w-4 bg-gray-200 rounded'></div>
                             </div>
-                        </li>
+                        </div>
                     ))}
-                </ul>
-                <table className='min-w-full hidden md:table'>
-                    <thead>
-                        <tr className='bg-gray-200'>
-                            <th className='px-4 py-2 text-left'>Original URL</th>
-                            <th className='px-4 py-2 text-left'>Shortened URL</th>
-                            <th className='px-4 py-2 text-left'></th>
-                            <th className='px-4 py-2 text-left'></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {urls.map((url) => (
-                            <tr key={url.id} className='border-b'>
-                                <td className='px-4 py-2'>
-                                    <Link href={url.originalUrl} target='_blank' className='text-blue-500'>
-                                        {url.originalUrl}
-                                    </Link>
-                                </td>
-                                <td className='px-4 py-2'>
-                                    <Link href={`/${url.shortCode}`} target='_blank' className='text-blue-500'>
-                                        {shortenerUrl(url.shortCode)}
-                                    </Link>
-                                </td>
-                                <td className='px-4 py-2'>
-                                    <span className='flex items-center gap-2'>
-                                        <EyeIcon className='w-4 h-4' />
-                                        {url.visits}
-                                    </span>
-                                </td>
-                                <td className='px-4 py-2'>
-                                    <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted' onClick={() => handleCopyUrl(url.shortCode)}>
-                                        {copied && copyUrl === url.shortCode ? (
-                                            <Check className='w-4 h-4' />
-                                        ) : (
-                                            <CopyIcon className='w-4 h-4' />
-                                        )}
-                                        <span className='sr-only'>Copy to Clipboard</span>
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                </div>
             </div>
         )
     }
 
     return (
-        <div>
-            <h2 className='text-2xl font-bold mb-2'>Recent URLs</h2>
-            <ul className='space-y-2 md:hidden'>
-                {urls.map((url) => (
-                    <li key={url.id} className='flex justify-between items-center gap-2'>
-                        <Link href={`/${url.shortCode}`} target='_blank' className='text-blue-500'>
-                            {shortenerUrl(url.shortCode)}
-                        </Link>
-                        <div className='flex items-center gap-2'>
-                            <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted' onClick={() => handleCopyUrl(url.shortCode)}>
-                                {copied && copyUrl == url.shortCode ? (
-                                    <Check className='w-4 h-4' />
-                                ) : (
-                                    <CopyIcon className='w-4 h-4' />
-                                )}
-                                <span className='sr-only'>Copy to Clipboard</span>
-                            </Button>
-                            <span className='flex items-center gap-2'>
-                                <EyeIcon className='w-4 h-4' />
-                                {url.visits}
-                            </span>
-                        </div>
-                    </li>
-                ))}
-            </ul>
-            <table className='min-w-full hidden md:table'>
-                <thead>
-                    <tr className='bg-gray-200'>
-                        <th className='px-4 py-2 text-left'>Original URL</th>
-                        <th className='px-4 py-2 text-left'>Shortened URL</th>
-                        <th className='px-4 py-2 text-left'></th>
-                        <th className='px-4 py-2 text-left'></th>
-                    </tr>
-                </thead>
-                <tbody>
+        <div className="flex flex-col items-center justify-center">
+            <div className="bg-gray-700 pt-6 rounded-t-2xl rounded-b-lg w-96 sm:w-full relative">
+                <h2 className="pl-6 text-lg font-semibold mb-4 text-neutral-300">Shorten Links</h2>
+                <div className="relative overflow-hidden rounded-b-lg">
                     {urls.map((url) => (
-                        <tr key={url.id} className='border-b'>
-                            <td className='px-4 py-2'>
-                                <Link href={url.originalUrl} target='_blank' className='text-blue-500'>
-                                    {url.originalUrl}
-                                </Link>
-                            </td>
-                            <td className='px-4 py-2'>
-                                <Link href={`/${url.shortCode}`} target='_blank' className='text-blue-500'>
-                                    {shortenerUrl(url.shortCode)}
-                                </Link>
-                            </td>
-                            <td className='px-4 py-2'>
-                                <span className='flex items-center gap-2'>
-                                    <EyeIcon className='w-4 h-4' />
-                                    {url.visits}
-                                </span>
-                            </td>
-                            <td className='px-4 py-2'>
-                                <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted' onClick={() => handleCopyUrl(url.shortCode)}>
+                        <div key={url.id} className="flex items-center justify-between bg-gray-900 px-6 py-3 mb-[2px]">
+                            <Link href={`/${url.shortCode}`} target='_blank' className='text-neutral-300 w-3/5 overflow-hidden whitespace-nowrap text-ellipsis'>
+                                {shortenerUrl(url.shortCode)}
+                            </Link>
+                            <Link href={url.originalUrl} target='_blank' className='text-neutral-300 w-3/5 overflow-hidden whitespace-nowrap text-ellipsis hidden sm:block'>
+                                {url.originalUrl}
+                            </Link>
+                            <div className="flex items-center space-x-2">
+                                <Button variant="ghost" size='icon' className='text-muted-foreground hover:bg-muted/10' onClick={() => handleCopyUrl(url.shortCode)}>
                                     {copied && copyUrl === url.shortCode ? (
-                                        <Check className='w-4 h-4' />
+                                        <Check className='w-4 h-4 text-neutral-300' />
                                     ) : (
-                                        <CopyIcon className='w-4 h-4' />
+                                        <CopyIcon className='w-4 h-4 text-neutral-300' />
                                     )}
                                     <span className='sr-only'>Copy to Clipboard</span>
                                 </Button>
-                            </td>
-                        </tr>
+                                <span className='flex items-center gap-2 text-neutral-300'>
+                                    <EyeIcon className='w-4 h-4 text-neutral-300' />
+                                    {url.visits}
+                                </span>
+                            </div>
+                        </div>
                     ))}
-                </tbody>
-            </table>
+                    <div className="absolute rounded-b-lg bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none" />
+                </div>
+            </div>
         </div>
     )
 }
