@@ -4,15 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { userId } = getAuth(request);
-  const getIpAddress = async (): Promise<string | null> => {
-    try {
-      const response = await fetch("https://api.ipify.org?format=json");
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      console.error("Failed to fetch IP address:", error);
-      return null;
+  const getIpAddress = (request: NextRequest): string | null => {
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    if (forwardedFor) {
+      return forwardedFor.split(",")[0];
     }
+    return request.ip || null;
   };
 
   try {
@@ -22,7 +19,14 @@ export async function GET(request: NextRequest) {
       });
       return NextResponse.json(urls);
     } else {
-      const ipAddress = await getIpAddress();
+      const ipAddress = getIpAddress(request);
+
+      if (!ipAddress) {
+        return NextResponse.json(
+          { error: "IP address not found" },
+          { status: 400 }
+        );
+      }
 
       const urls = await prisma.url.findMany({
         where: {
